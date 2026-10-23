@@ -2,9 +2,8 @@
    GLOBAL & VARIABLES (Light / Dark Mode)
    ========================================= */
 :root {
-    /* Default: Dark Mode */
     --bg-main: #000000;
-    --bg-radial: #1a0b2e; /* Dark Purple */
+    --bg-radial: #1a0b2e;
     --text-main: #ffffff;
     --text-muted: #9ca3af;
     
@@ -25,9 +24,8 @@
 }
 
 body[data-theme="light"] {
-    /* Light Mode Overrides */
     --bg-main: #f8fafc;
-    --bg-radial: #f3e8ff; /* Soft Lavender */
+    --bg-radial: #f3e8ff;
     --text-main: #0f172a;
     --text-muted: #64748b;
     
@@ -145,6 +143,15 @@ header {
 }
 
 .header-left, .header-right { display: flex; align-items: center; gap: 1rem; }
+
+/* Gaya untuk Judul Header */
+.header-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-left: 0.5rem;
+    letter-spacing: 0.5px;
+}
 
 .icon-btn {
     background: var(--glass-bg);
@@ -295,6 +302,30 @@ header {
 textarea.form-control { resize: vertical; min-height: 100px; }
 select.form-control { cursor: pointer; }
 select.form-control option { background: var(--bg-main); color: var(--text-main); }
+
+/* --- STYLING UNTUK INPUT FILE (BROWSE) --- */
+input[type="file"].form-control {
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+input[type="file"]::file-selector-button {
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 1rem;
+    transition: var(--transition);
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: var(--primary-hover);
+}
+/* ----------------------------------------- */
 
 .btn-submit {
     width: 100%; padding: 1rem; margin-top: 1rem;
