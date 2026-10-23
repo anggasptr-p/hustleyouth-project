@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HustleYouth - Katalog</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h1><i class="fa-solid fa-bolt"></i> HustleYouth</h1>
+            <button id="close-sidebar" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html" class="active"><i class="fa-solid fa-compass"></i> Katalog Jasa</a>
+            <a href="tambah-jasa.html"><i class="fa-solid fa-plus-circle"></i> Buka Jasa</a>
+        </nav>
+    </aside>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header>
+            <div class="header-left">
+                <button id="open-sidebar" class="icon-btn"><i class="fa-solid fa-bars"></i></button>
+                <div class="search-container">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Cari jasa, nama, atau sekolah...">
+                </div>
+            </div>
+            <div class="header-right">
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="icon-btn" title="Ubah Tema">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="container">
+            <div class="filters" id="category-filters">
+                <button class="filter-btn active" data-category="all">Semua</button>
+                <button class="filter-btn" data-category="Design">Design</button>
+                <button class="filter-btn" data-category="Video">Video</button>
+                <button class="filter-btn" data-category="Code">Code</button>
+                <button class="filter-btn" data-category="Writing">Writing</button>
+            </div>
+
+            <!-- Grid Container -->
+            <div id="gigs-container" class="grid">
+                <!-- Rendered via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Detail -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button id="close-modal" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+            <div id="modal-content" style="margin-top: 1rem;">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
