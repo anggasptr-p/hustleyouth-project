@@ -1,12 +1,11 @@
-// Mock Data (Simulasi API backend)
-const mockData = [
-    { id: 1, title: "Desain Logo Minimalis", category: "Design", freelancer_name: "Budi Santoso", school: "SMK Telkom", price: 50000, whatsapp: "081234567890", description: "Saya membuat desain logo minimalis modern dengan 3x revisi.", image_url: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=500&q=80" },
-    { id: 2, title: "Editing Video Tiktok/Reels", category: "Video", freelancer_name: "Siti Aminah", school: "SMA Negeri 1", price: 75000, whatsapp: "628987654321", description: "Editing video pendek dengan transisi keren dan subtitle otomatis.", image_url: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=500&q=80" },
-    { id: 3, title: "Landing Page HTML/Tailwind", category: "Code", freelancer_name: "Andi Wijaya", school: "Universitas Bina", price: 150000, whatsapp: "081122334455", description: "Jasa pembuatan landing page responsif.", image_url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&q=80" },
-    { id: 4, title: "Penulisan Artikel SEO", category: "Writing", freelancer_name: "Rina Putri", school: "SMAN 5", price: 30000, whatsapp: "085566778899", description: "Artikel 500 kata, riset keyword, dan ramah SEO.", image_url: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=500&q=80" }
-];
+// Otomatis pake http://localhost:5000 pas dev lokal, atau relatif pas di Vercel
+const BASE_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:5000/api'
+  : '/api';
 
-window.allGigs = [];
+const API_URL = `${BASE_API}/gigs`;
+const AUTH_API = `${BASE_API}/auth`;
+const STREAM_API = `${BASE_API}/posts`;
 
 // 1. DOM Content Loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,20 +15,21 @@ document.addEventListener('DOMContentLoaded', () => {
     setupModalEvents();
 });
 
-// 2. Fetch Gigs
+// 2. Fetch Gigs dari Backend Neon DB
 async function fetchGigs() {
     try {
-        // Simulasi Fetch API (Karena backend localhost:5000 tidak berjalan)
-        // const response = await fetch('http://localhost:5000/api/gigs');
-        // const data = await response.json();
+        const response = await fetch(API_URL);
+        const result = await response.json();
         
-        const data = mockData; 
-        window.allGigs = data;
-        
-        renderGigs(window.allGigs);
-        setupSearchAndFilter();
+        if (result.status === 'success') {
+            window.allGigs = result.data;
+            renderGigs(window.allGigs);
+            setupSearchAndFilter();
+        } else {
+            console.error("Error backend:", result.message);
+        }
     } catch (error) {
-        console.error("Gagal load data", error);
+        console.error("Gagal load data dari backend:", error);
     }
 }
 
@@ -61,7 +61,7 @@ function renderGigs(dataList) {
                 <h3 class="card-title">${gig.title}</h3>
                 <p class="card-meta"><i class="fa-solid fa-user"></i> ${gig.freelancer_name} • ${gig.school}</p>
                 <div class="card-footer">
-                    <span class="card-price">Rp ${gig.price.toLocaleString('id-ID')}</span>
+                    <span class="card-price">Rp ${Number(gig.price).toLocaleString('id-ID')}</span>
                     <span class="btn-detail">Detail</span>
                 </div>
             </div>
@@ -101,7 +101,8 @@ function setupSearchAndFilter() {
 
 // 5. Modal Logic
 function openModal(gigId) {
-    const gig = window.allGigs.find(g => g.id === gigId);
+    // Pake loose equality (==) biar ID string dari Neon DB / UUID tetep terbaca
+    const gig = window.allGigs.find(g => g.id == gigId);
     if (!gig) return;
 
     const modalContent = document.getElementById('modal-content');
@@ -116,18 +117,16 @@ function openModal(gigId) {
         <img src="${imgUrl}" style="width:100%; height:180px; object-fit:cover; border-radius:0.5rem; margin-bottom:1rem;">
         <span style="background:rgba(139,92,246,0.2); color:var(--primary); padding:0.25rem 0.75rem; border-radius:999px; font-size:0.75rem;">${gig.category}</span>
         <h2 style="margin:0.5rem 0;">${gig.title}</h2>
-        <p style="color:var(--primary); font-weight:bold; font-size:1.2rem; margin-bottom:1rem;">Rp ${gig.price.toLocaleString('id-ID')}</p>
+        <p style="color:var(--primary); font-weight:bold; font-size:1.2rem; margin-bottom:1rem;">Rp ${Number(gig.price).toLocaleString('id-ID')}</p>
         <p style="color:var(--text-muted); margin-bottom:0.5rem;"><i class="fa-solid fa-user"></i> ${gig.freelancer_name} (${gig.school})</p>
         <p style="margin-bottom:1.5rem; line-height:1.5;">${gig.description}</p>
         
-        <!-- ID order-wa-btn sesuai PRD -->
-        <a href="${waLink}" target="_blank" id="order-wa-btn" style="display:block; width:100%; text-align:center; background:#16a34a; color:white; font-weight:bold; padding:0.875rem; border-radius:0.5rem;">
+        <a href="${waLink}" target="_blank" id="order-wa-btn" style="display:block; width:100%; text-align:center; background:#16a34a; color:white; font-weight:bold; padding:0.875rem; border-radius:0.5rem; text-decoration:none;">
             <i class="fa-brands fa-whatsapp"></i> Order via WhatsApp
         </a>
     `;
 
     overlay.classList.remove('hidden');
-    // Timeout kecil agar transisi CSS berjalan
     setTimeout(() => overlay.classList.add('active'), 10); 
 }
 
@@ -140,15 +139,18 @@ function setupModalEvents() {
         setTimeout(() => overlay.classList.add('hidden'), 300);
     };
 
-    closeBtn.addEventListener('click', closeModal);
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeModal();
-    });
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+    }
 }
 
 // 6. Theme Toggle Logic
 function initTheme() {
     const themeBtn = document.getElementById('theme-toggle');
+    if (!themeBtn) return;
     const icon = themeBtn.querySelector('i');
     
     const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -165,6 +167,7 @@ function initTheme() {
 }
 
 function updateIcon(theme, icon) {
+    if (!icon) return;
     icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
 }
 
@@ -180,7 +183,7 @@ function initSidebar() {
         else { sidebar.classList.remove('active'); overlay.classList.remove('active'); }
     };
 
-    openBtn.addEventListener('click', () => toggle(true));
-    closeBtn.addEventListener('click', () => toggle(false));
-    overlay.addEventListener('click', () => toggle(false));
+    if (openBtn) openBtn.addEventListener('click', () => toggle(true));
+    if (closeBtn) closeBtn.addEventListener('click', () => toggle(false));
+    if (overlay) overlay.addEventListener('click', () => toggle(false));
 }

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HustleYouth - Stream Room</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo-brand">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#8B5CF6"/></svg>
+                <span>Hustle<span style="color:var(--text-main);">Youth</span></span>
+            </a>
+            <button id="close-sidebar" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html"><i class="fa-solid fa-compass"></i> Katalog Jasa</a>
+            <a href="stream.html" class="active"><i class="fa-solid fa-comments"></i> Stream Chat</a>
+            <a href="tambah-jasa.html"><i class="fa-solid fa-plus-circle"></i> Buka Jasa</a>
+        </nav>
+    </aside>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Main Content Layout -->
+    <main class="main-content stream-page-layout">
+        <header>
+            <div class="header-left">
+                <button id="open-sidebar" class="icon-btn" title="Menu Sidebar"><i class="fa-solid fa-bars"></i></button>
+                <a href="index.html" class="logo-brand">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#8B5CF6"/></svg>
+                    <span>Hustle<span style="color:var(--text-main);">Youth</span></span>
+                </a>
+            </div>
+            <div class="header-right">
+                <button id="theme-toggle" class="icon-btn" title="Ubah Tema"><i class="fa-solid fa-sun"></i></button>
+                <div id="nav-user-container"></div>
+            </div>
+        </header>
+
+        <!-- Stream Feed Area -->
+        <div class="chat-feed-container">
+            <div class="stream-filter-bar" id="stream-filters">
+                <button class="filter-btn active" onclick="filterStream('all', this)">Semua Chat</button>
+                <button class="filter-btn" onclick="filterStream('hiring', this)">🟢 Butuh Talent</button>
+                <button class="filter-btn" onclick="filterStream('seeking_job', this)">🔵 Tawar Jasa</button>
+            </div>
+
+            <div id="stream-container" class="chat-bubbles-wrapper"></div>
+        </div>
+
+        <!-- Sticky Bottom Chat Input Bar -->
+        <div class="bottom-chat-bar">
+            <form id="stream-form" onsubmit="handleCreatePost(event)" class="chat-input-form">
+                <div class="chat-type-chips">
+                    <label class="chip-btn selected-hiring" id="chip-hiring">
+                        <input type="radio" name="post_type" value="hiring" checked onclick="toggleTypeChip('hiring')">
+                        🟢 Hiring
+                    </label>
+                    <label class="chip-btn" id="chip-seeking">
+                        <input type="radio" name="post_type" value="seeking_job" onclick="toggleTypeChip('seeking')">
+                        🔵 Showcase
+                    </label>
+                </div>
+
+                <div class="chat-input-wrapper">
+                    <label for="post_image_file" class="btn-attach-file" title="Upload Gambar/Foto">
+                        <i class="fa-solid fa-paperclip"></i>
+                        <input type="file" id="post_image_file" accept="image/*" style="display:none;" onchange="previewFileSelected(this)">
+                    </label>
+                    <textarea id="post_content" class="chat-textarea" placeholder="Tulis pesan atau penawaranmu disini..." required rows="1"></textarea>
+                    <button type="submit" class="btn-send-chat" id="btn-submit-post">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div id="file-selected-indicator" class="file-indicator hidden"></div>
+            </form>
+        </div>
+    </main>
+
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/stream.js"></script>
+</body>
+</html>
