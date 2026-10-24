@@ -1,189 +1,139 @@
-// Otomatis pake http://localhost:5000 pas dev lokal, atau relatif pas di Vercel
-const BASE_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:5000/api'
-  : '/api';
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:5000/api/gigs'
+  : '/api/gigs';
 
-const API_URL = `${BASE_API}/gigs`;
-const AUTH_API = `${BASE_API}/auth`;
-const STREAM_API = `${BASE_API}/posts`;
+let allGigs = [];
 
-// 1. DOM Content Loaded
 document.addEventListener('DOMContentLoaded', () => {
-    initTheme();
-    initSidebar();
     fetchGigs();
-    setupModalEvents();
+    setupFilters();
+    setupSearch();
 });
 
-// 2. Fetch Gigs dari Backend Neon DB
+// 1. Fetch Data Gigs dari API
 async function fetchGigs() {
+    const container = document.getElementById('gigs-container');
+    if (!container) return;
+
     try {
-        const response = await fetch(API_URL);
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-            window.allGigs = result.data;
-            renderGigs(window.allGigs);
-            setupSearchAndFilter();
+        container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:3rem;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat data jasa...</p>`;
+
+        const res = await fetch(API_URL);
+        const result = await res.json();
+
+        if (res.ok && (result.status === 'success' || Array.isArray(result.data))) {
+            allGigs = result.data || [];
+            renderGigs(allGigs);
         } else {
-            console.error("Error backend:", result.message);
+            container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:3rem;">Gagal memuat katalog jasa ler.</p>`;
         }
-    } catch (error) {
-        console.error("Gagal load data dari backend:", error);
+    } catch (err) {
+        console.error('Fetch error:', err);
+        container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:3rem;">Gagal terhubung ke server backend.</p>`;
     }
 }
 
-// 3. Render Gigs
-function renderGigs(dataList) {
+// 2. Render Kartu Gigs
+function renderGigs(gigs) {
     const container = document.getElementById('gigs-container');
-    container.innerHTML = '';
+    if (!container) return;
 
-    if (dataList.length === 0) {
-        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">
-            <i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-            <p>Jasa tidak ditemukan.</p>
-        </div>`;
+    if (!gigs || gigs.length === 0) {
+        container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:3rem;">Belum ada jasa yang tersedia saat ini.</p>`;
         return;
     }
 
-    dataList.forEach(gig => {
-        const imgUrl = gig.image_url || 'https://via.placeholder.com/400x200/1a0b2e/8b5cf6?text=No+Image';
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.onclick = () => openModal(gig.id);
+    const defaultImg = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80';
 
-        card.innerHTML = `
+    container.innerHTML = gigs.map(gig => `
+        <div class="card" onclick="openModal('${gig.id}')">
             <div class="card-img-wrapper">
-                <img src="${imgUrl}" alt="${gig.title}">
+                <img src="${gig.image_url || defaultImg}" alt="${gig.title}" onerror="this.src='${defaultImg}'">
                 <span class="card-category">${gig.category}</span>
             </div>
             <div class="card-body">
                 <h3 class="card-title">${gig.title}</h3>
-                <p class="card-meta"><i class="fa-solid fa-user"></i> ${gig.freelancer_name} • ${gig.school}</p>
+                <p class="card-meta">👤 ${gig.freelancer_name} • ${gig.school}</p>
                 <div class="card-footer">
                     <span class="card-price">Rp ${Number(gig.price).toLocaleString('id-ID')}</span>
                     <span class="btn-detail">Detail</span>
                 </div>
             </div>
-        `;
-        container.appendChild(card);
-    });
+        </div>
+    `).join('');
 }
 
-// 4. Search & Filter
-function setupSearchAndFilter() {
-    const searchInput = document.getElementById('search-input');
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    let activeCategory = 'all';
-
-    function applyFilter() {
-        const keyword = searchInput.value.toLowerCase();
-        const filtered = window.allGigs.filter(gig => {
-            const matchSearch = gig.title.toLowerCase().includes(keyword) || 
-                                gig.freelancer_name.toLowerCase().includes(keyword) ||
-                                gig.school.toLowerCase().includes(keyword);
-            const matchCategory = activeCategory === 'all' || gig.category === activeCategory;
-            return matchSearch && matchCategory;
-        });
-        renderGigs(filtered);
-    }
-
-    searchInput.addEventListener('input', applyFilter);
+// 3. Category Filter
+function setupFilters() {
+    const filterBtns = document.querySelectorAll('#category-filters .filter-btn');
     filterBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
             filterBtns.forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            activeCategory = e.target.getAttribute('data-category');
-            applyFilter();
+            btn.classList.add('active');
+
+            const cat = btn.getAttribute('data-category');
+            if (cat === 'all') {
+                renderGigs(allGigs);
+            } else {
+                renderGigs(allGigs.filter(g => g.category && g.category.toLowerCase() === cat.toLowerCase()));
+            }
         });
     });
 }
 
-// 5. Modal Logic
-function openModal(gigId) {
-    // Pake loose equality (==) biar ID string dari Neon DB / UUID tetep terbaca
-    const gig = window.allGigs.find(g => g.id == gigId);
+// 4. Live Search
+function setupSearch() {
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = allGigs.filter(g => 
+            (g.title && g.title.toLowerCase().includes(query)) ||
+            (g.freelancer_name && g.freelancer_name.toLowerCase().includes(query)) ||
+            (g.school && g.school.toLowerCase().includes(query)) ||
+            (g.category && g.category.toLowerCase().includes(query))
+        );
+        renderGigs(filtered);
+    });
+}
+
+// 5. Pop-up Modal Detail
+function openModal(id) {
+    const gig = allGigs.find(g => g.id === id);
     if (!gig) return;
 
-    const modalContent = document.getElementById('modal-content');
     const overlay = document.getElementById('modal-overlay');
-    
-    // Format WA Link otomatis
-    const waText = encodeURIComponent(`Halo ${gig.freelancer_name}, saya tertarik dengan jasa Anda "${gig.title}" di HustleYouth.`);
-    const waLink = `https://wa.me/${gig.whatsapp}?text=${waText}`;
-    const imgUrl = gig.image_url || 'https://via.placeholder.com/600x300/1a0b2e/8b5cf6?text=No+Image';
+    const content = document.getElementById('modal-content');
+    if (!overlay || !content) return;
 
-    modalContent.innerHTML = `
-        <img src="${imgUrl}" style="width:100%; height:180px; object-fit:cover; border-radius:0.5rem; margin-bottom:1rem;">
-        <span style="background:rgba(139,92,246,0.2); color:var(--primary); padding:0.25rem 0.75rem; border-radius:999px; font-size:0.75rem;">${gig.category}</span>
-        <h2 style="margin:0.5rem 0;">${gig.title}</h2>
-        <p style="color:var(--primary); font-weight:bold; font-size:1.2rem; margin-bottom:1rem;">Rp ${Number(gig.price).toLocaleString('id-ID')}</p>
-        <p style="color:var(--text-muted); margin-bottom:0.5rem;"><i class="fa-solid fa-user"></i> ${gig.freelancer_name} (${gig.school})</p>
-        <p style="margin-bottom:1.5rem; line-height:1.5;">${gig.description}</p>
-        
-        <a href="${waLink}" target="_blank" id="order-wa-btn" style="display:block; width:100%; text-align:center; background:#16a34a; color:white; font-weight:bold; padding:0.875rem; border-radius:0.5rem; text-decoration:none;">
-            <i class="fa-brands fa-whatsapp"></i> Order via WhatsApp
-        </a>
+    const waText = encodeURIComponent(`Halo ${gig.freelancer_name}, saya lihat jasa Anda "${gig.title}" di HustleYouth dan berminat untuk order.`);
+    const waLink = `https://wa.me/${gig.whatsapp}?text=${waText}`;
+
+    content.innerHTML = `
+        <div style="text-align:center; margin-bottom:1rem;">
+            <span class="card-category" style="position:static; display:inline-block; margin-bottom:0.5rem;">${gig.category}</span>
+            <h2 style="font-size:1.3rem; font-weight:800; line-height:1.3;">${gig.title}</h2>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.35rem;">Oleh <b>${gig.freelancer_name}</b> (${gig.school})</p>
+        </div>
+        ${gig.image_url ? `<img src="${gig.image_url}" style="width:100%; max-height:220px; object-fit:cover; border-radius:0.85rem; margin-bottom:1rem;">` : ''}
+        <p style="font-size:0.9rem; line-height:1.6; color:var(--text-main); margin-bottom:1.5rem; white-space:pre-line;">${gig.description}</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1rem; border-top:1px solid var(--glass-border);">
+            <span class="card-price" style="font-size:1.25rem;">Rp ${Number(gig.price).toLocaleString('id-ID')}</span>
+            <a href="${waLink}" target="_blank" class="btn-wa-direct" style="padding:0.6rem 1.25rem; font-size:0.875rem;">
+                <i class="fa-brands fa-whatsapp"></i> Order via WA
+            </a>
+        </div>
     `;
 
     overlay.classList.remove('hidden');
-    setTimeout(() => overlay.classList.add('active'), 10); 
-}
+    overlay.classList.add('active');
 
-function setupModalEvents() {
-    const overlay = document.getElementById('modal-overlay');
     const closeBtn = document.getElementById('close-modal');
-
-    const closeModal = () => {
-        overlay.classList.remove('active');
-        setTimeout(() => overlay.classList.add('hidden'), 300);
-    };
-
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (overlay) {
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeModal();
-        });
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            overlay.classList.remove('active');
+            overlay.classList.add('hidden');
+        };
     }
-}
-
-// 6. Theme Toggle Logic
-function initTheme() {
-    const themeBtn = document.getElementById('theme-toggle');
-    if (!themeBtn) return;
-    const icon = themeBtn.querySelector('i');
-    
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    document.body.setAttribute('data-theme', savedTheme);
-    updateIcon(savedTheme, icon);
-
-    themeBtn.addEventListener('click', () => {
-        const current = document.body.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        document.body.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        updateIcon(next, icon);
-    });
-}
-
-function updateIcon(theme, icon) {
-    if (!icon) return;
-    icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-}
-
-// 7. Sidebar Logic
-function initSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    const openBtn = document.getElementById('open-sidebar');
-    const closeBtn = document.getElementById('close-sidebar');
-
-    const toggle = (open) => {
-        if(open) { sidebar.classList.add('active'); overlay.classList.add('active'); }
-        else { sidebar.classList.remove('active'); overlay.classList.remove('active'); }
-    };
-
-    if (openBtn) openBtn.addEventListener('click', () => toggle(true));
-    if (closeBtn) closeBtn.addEventListener('click', () => toggle(false));
-    if (overlay) overlay.addEventListener('click', () => toggle(false));
 }
