@@ -1,9 +1,9 @@
-// Otomatis pake http://localhost:5000 pas dev lokal, atau relatif pas di Vercel
-const BASE_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:5000/api'
-  : '/api';
+// Menggunakan BASE_API dari auth.js jika ada, atau buat fallback aman
+const STREAM_BASE_API = typeof BASE_API !== 'undefined' 
+  ? BASE_API 
+  : ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : '/api');
 
-const STREAM_API = `${BASE_API}/posts`;
+const STREAM_API = `${STREAM_BASE_API}/posts`;
 const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/wk9j9o7f/image/upload';
 const CLOUDINARY_PRESET = 'hustleyouth_preset';
 
