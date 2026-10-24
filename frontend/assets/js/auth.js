@@ -3,9 +3,7 @@ const BASE_API = (window.location.hostname === 'localhost' || window.location.ho
   ? 'http://localhost:5000/api'
   : '/api';
 
-const API_URL = `${BASE_API}/gigs`;
 const AUTH_API = `${BASE_API}/auth`;
-const STREAM_API = `${BASE_API}/posts`;
 
 // Helper: Cek apakah user udah login
 function getCurrentUser() {
