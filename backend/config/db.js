@@ -22,10 +22,30 @@ const initDB = async () => {
       image_url TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS users (
+      id VARCHAR(50) PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      school VARCHAR(100) NOT NULL,
+      whatsapp VARCHAR(20) NOT NULL UNIQUE,
+      email VARCHAR(100) NOT NULL UNIQUE,
+      password VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS posts (
+      id VARCHAR(50) PRIMARY KEY,
+      user_id VARCHAR(50) REFERENCES users(id) ON DELETE CASCADE,
+      post_type VARCHAR(20) NOT NULL,
+      content TEXT NOT NULL,
+      image_url TEXT,
+      likes_count INT DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
   `;
   try {
     await pool.query(query);
-    console.log('Database Neon PostgreSQL terhubung & tabel gigs aman ler! 🚀');
+    console.log('Database Neon DB & semua tabel (gigs, users, posts) aman ler! 🚀');
   } catch (err) {
     console.error('Error koneksi Neon DB:', err.message);
   }

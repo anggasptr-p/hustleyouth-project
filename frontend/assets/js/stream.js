@@ -3,8 +3,6 @@ const BASE_API = (window.location.hostname === 'localhost' || window.location.ho
   ? 'http://localhost:5000/api'
   : '/api';
 
-const API_URL = `${BASE_API}/gigs`;
-const AUTH_API = `${BASE_API}/auth`;
 const STREAM_API = `${BASE_API}/posts`;
 const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/wk9j9o7f/image/upload';
 const CLOUDINARY_PRESET = 'hustleyouth_preset';
@@ -17,16 +15,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 1. Fetch & Render Stream Chat Bubbles
 async function fetchPosts() {
+    const container = document.getElementById('stream-container');
+    if (!container) return;
+
     try {
+        container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:3rem;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat obrolan stream...</p>`;
+
         const url = currentFilter === 'all' ? STREAM_API : `${STREAM_API}?type=${currentFilter}`;
         const res = await fetch(url);
         const result = await res.json();
 
-        if (result.status === 'success') {
-            renderStream(result.data);
+        if (res.ok && result.status === 'success') {
+            renderStream(result.data || []);
+        } else {
+            container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:3rem;">Gagal memuat stream. Pastikan tabel database sudah terisi.</p>`;
         }
     } catch (err) {
         console.error("Gagal load stream:", err);
+        container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:3rem;">Gagal terhubung ke server stream.</p>`;
     }
 }
 
@@ -34,7 +40,7 @@ function renderStream(posts) {
     const container = document.getElementById('stream-container');
     if (!container) return;
 
-    if (posts.length === 0) {
+    if (!posts || posts.length === 0) {
         container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:3rem;">Belum ada obrolan di Stream. Kirim pesan pertamamu!</p>`;
         return;
     }
@@ -59,7 +65,7 @@ function renderStream(posts) {
                 ${post.image_url ? `<img src="${post.image_url}" class="chat-bubble-img" alt="Attachment">` : ''}
                 <div class="chat-bubble-footer">
                     <button onclick="likePost('${post.id}', this)" class="btn-like">
-                        <i class="fa-solid fa-heart"></i> <span>${post.likes_count}</span>
+                        <i class="fa-solid fa-heart"></i> <span>${post.likes_count || 0}</span>
                     </button>
                     <a href="${waLink}" target="_blank" class="btn-wa-direct">
                         <i class="fa-brands fa-whatsapp"></i> Chat / DM WA
@@ -82,16 +88,17 @@ async function handleCreatePost(e) {
     }
 
     const content = document.getElementById('post_content').value;
-    const postType = document.querySelector('input[name="post_type"]:checked').value;
+    const postTypeRadio = document.querySelector('input[name="post_type"]:checked');
+    const postType = postTypeRadio ? postTypeRadio.value : 'hiring';
     const imageInput = document.getElementById('post_image_file');
 
     const btn = document.getElementById('btn-submit-post');
-    btn.disabled = true;
+    if (btn) btn.disabled = true;
 
     try {
         let imageUrl = null;
         if (imageInput && imageInput.files.length > 0) {
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+            if (btn) btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
             const formData = new FormData();
             formData.append('file', imageInput.files[0]);
             formData.append('upload_preset', CLOUDINARY_PRESET);
@@ -100,7 +107,7 @@ async function handleCreatePost(e) {
             imageUrl = clData.secure_url;
         }
 
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+        if (btn) btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
         const res = await fetch(STREAM_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -114,7 +121,8 @@ async function handleCreatePost(e) {
 
         if (res.ok) {
             document.getElementById('stream-form').reset();
-            document.getElementById('file-selected-indicator').classList.add('hidden');
+            const indicator = document.getElementById('file-selected-indicator');
+            if (indicator) indicator.classList.add('hidden');
             fetchPosts();
         } else {
             alert("Gagal ngirim pesan ler!");
@@ -122,14 +130,17 @@ async function handleCreatePost(e) {
     } catch (err) {
         alert("Terjadi kesalahan sistem!");
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
+        }
     }
 }
 
 // 3. Helper Functions
 function previewFileSelected(input) {
     const indicator = document.getElementById('file-selected-indicator');
+    if (!indicator) return;
     if (input.files.length > 0) {
         indicator.innerText = `📎 File terpilih: ${input.files[0].name}`;
         indicator.classList.remove('hidden');
@@ -152,6 +163,8 @@ async function likePost(id, btn) {
 function toggleTypeChip(type) {
     const chipHiring = document.getElementById('chip-hiring');
     const chipSeeking = document.getElementById('chip-seeking');
+    if (!chipHiring || !chipSeeking) return;
+
     if (type === 'hiring') {
         chipHiring.classList.add('selected-hiring');
         chipSeeking.classList.remove('selected-seeking');
@@ -164,6 +177,6 @@ function toggleTypeChip(type) {
 function filterStream(type, btn) {
     currentFilter = type;
     document.querySelectorAll('#stream-filters .filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    if (btn) btn.classList.add('active');
     fetchPosts();
 }
