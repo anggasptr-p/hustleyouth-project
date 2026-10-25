@@ -423,36 +423,34 @@ input[type="file"]::file-selector-button { background: var(--primary); color: #f
     .form-wrapper, .auth-card { padding: 1.5rem; margin-top: 1rem; }
     .marquee-content { font-size: 0.75rem; }
 }
+
 /* =========================================
-   HUSTLY GUIDED TOUR (SPOTLIGHT EFFECT)
+   HUSTLY GUIDED TOUR (MOBILE OPTIMIZED)
    ========================================= */
 .tour-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6); /* Dark background */
+    background: transparent; 
     z-index: 9998;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease;
-    pointer-events: none; /* Let clicks pass to highlighted element if needed */
+    pointer-events: none; 
 }
 .tour-overlay.active {
     opacity: 1;
     visibility: visible;
-    pointer-events: auto;
+    pointer-events: auto; 
 }
 
-/* The Spotlight Effect */
 .tour-highlight {
     position: relative;
     z-index: 9999 !important;
-    /* This creates a massive shadow around the element to darken the rest of the screen */
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75) !important; 
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85) !important; 
     border-radius: 8px;
-    pointer-events: none; /* Prevent clicking during tour */
+    pointer-events: auto;
 }
 
-/* The Tooltip / Speech Bubble */
 .tour-tooltip {
     position: fixed;
     width: 340px;
@@ -461,20 +459,26 @@ input[type="file"]::file-selector-button { background: var(--primary); color: #f
     border: 2px solid var(--neon-lime);
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(204, 255, 0, 0.2);
-    z-index: 10000;
+    z-index: 10000; 
     padding: 1.5rem;
-    transition: top 0.3s ease, left 0.3s ease, transform 0.3s ease;
+    transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), left 0.4s ease, transform 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+}
+.tour-tooltip.active {
+    opacity: 1;
+    visibility: visible;
 }
 
-/* The Mascot inside the Tooltip */
 .tour-mascot-img {
     position: absolute;
-    top: -60px;
-    left: -20px;
+    top: -55px;
+    left: -15px;
     width: 100px;
     height: 100px;
     z-index: 10001;
     animation: float 3s infinite ease-in-out;
+    pointer-events: none;
 }
 .tour-mascot-img img {
     width: 100%;
@@ -484,7 +488,7 @@ input[type="file"]::file-selector-button { background: var(--primary); color: #f
 }
 
 .tour-content {
-    margin-top: 20px; /* Space for the mascot peeking over */
+    margin-top: 25px; /* Space for mascot */
 }
 
 .tour-header {
@@ -576,20 +580,27 @@ input[type="file"]::file-selector-button { background: var(--primary); color: #f
     box-shadow: 3px 3px 0px #000;
 }
 
-/* Mobile Responsiveness for Tour */
+/* =========================================
+   MOBILE FIXES FOR TOUR
+   ========================================= */
 @media (max-width: 480px) {
     .tour-tooltip {
-        width: calc(100vw - 40px);
-        left: 20px !important;
+        width: calc(100vw - 40px); /* Fits exactly on screen */
+        left: 20px !important; /* Overrides JS calculation to stay centered */
     }
     .tour-mascot-img {
-        width: 80px;
-        height: 80px;
+        width: 85px;
+        height: 85px;
         top: -45px;
+        left: 0px; /* Move slightly right on mobile */
     }
-}
-
-/* Optional: Make the SVG smaller on mobile */
-@media (max-width: 768px) {
-    .search-container { display: block !important; }
+    .tour-content {
+        margin-top: 20px;
+    }
+    .tour-title-text {
+        font-size: 1.15rem;
+    }
+    .tour-desc-text {
+        font-size: 0.85rem;
+    }
 }

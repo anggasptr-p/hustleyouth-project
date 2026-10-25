@@ -1,7 +1,6 @@
-// Data Langkah Onboarding Tutorial (Hustly Tour)
 const tourSteps = [
     {
-        target: null, // Center screen
+        target: null, 
         title: "Halo, kenalin aku Hustly! 👋",
         desc: "Aku bakal nemenin kamu keliling HustleYouth. Yuk, kenalan sama fitur-fiturnya biar kamu ga bingung!",
         position: 'center'
@@ -35,28 +34,24 @@ const tourSteps = [
 let currentStep = 0;
 
 function initOnboardingTour() {
-    // Cek apakah user udah pernah liat tutorial
     if (localStorage.getItem('hy_tour_done') === 'true') return;
 
-    // Inject HTML Overlay (Dark background + Tooltip Container)
     const tourHTML = `
-        <div id="tour-overlay" class="tour-overlay">
-            <!-- The Tooltip Box with Mascot -->
-            <div id="tour-tooltip" class="tour-tooltip">
-                <div class="tour-mascot-img">
-                    <img src="assets/img/mascot.png" alt="Hustly" onerror="this.style.display='none'">
+        <div id="tour-overlay" class="tour-overlay"></div>
+        <div id="tour-tooltip" class="tour-tooltip">
+            <div class="tour-mascot-img">
+                <img src="assets/img/mascot.png" alt="Hustly" onerror="this.style.display='none'">
+            </div>
+            <div class="tour-content">
+                <div class="tour-header">
+                    <span id="tour-badge" class="tour-badge-step">1 dari 5</span>
+                    <button onclick="skipTour()" class="btn-skip-tour">Skip ✕</button>
                 </div>
-                <div class="tour-content">
-                    <div class="tour-header">
-                        <span id="tour-badge" class="tour-badge-step">1 dari 5</span>
-                        <button onclick="skipTour()" class="btn-skip-tour">Skip ✕</button>
-                    </div>
-                    <h3 id="tour-title" class="tour-title-text">Title</h3>
-                    <p id="tour-desc" class="tour-desc-text">Description</p>
-                    <div class="tour-footer">
-                        <div class="tour-dots" id="tour-dots"></div>
-                        <button id="btn-next-tour" onclick="nextTourStep()" class="btn-tour-next">Lanjut →</button>
-                    </div>
+                <h3 id="tour-title" class="tour-title-text">Title</h3>
+                <p id="tour-desc" class="tour-desc-text">Description</p>
+                <div class="tour-footer">
+                    <div class="tour-dots" id="tour-dots"></div>
+                    <button id="btn-next-tour" onclick="nextTourStep()" class="btn-tour-next">Lanjut →</button>
                 </div>
             </div>
         </div>
@@ -64,9 +59,9 @@ function initOnboardingTour() {
 
     document.body.insertAdjacentHTML('beforeend', tourHTML);
     
-    // Beri sedikit delay agar DOM ready
     setTimeout(() => {
         document.getElementById('tour-overlay').classList.add('active');
+        document.getElementById('tour-tooltip').classList.add('active');
         updateTourUI();
     }, 500);
 }
@@ -74,27 +69,19 @@ function initOnboardingTour() {
 function updateTourUI() {
     const step = tourSteps[currentStep];
     
-    // Update Text
     document.getElementById('tour-title').innerText = step.title;
     document.getElementById('tour-desc').innerText = step.desc;
     document.getElementById('tour-badge').innerText = `${currentStep + 1} dari ${tourSteps.length}`;
 
-    // Update Dots
     const dotsContainer = document.getElementById('tour-dots');
     dotsContainer.innerHTML = tourSteps.map((_, idx) => `
         <span class="tour-dot ${idx === currentStep ? 'active' : ''}"></span>
     `).join('');
 
-    // Update Button Text
     const nextBtn = document.getElementById('btn-next-tour');
-    if (currentStep === tourSteps.length - 1) {
-        nextBtn.innerHTML = `Gas Coba! 🔥`;
-    } else {
-        nextBtn.innerHTML = `Lanjut →`;
-    }
+    nextBtn.innerHTML = currentStep === tourSteps.length - 1 ? `Gas Coba! 🔥` : `Lanjut →`;
 
     // --- SPOTLIGHT LOGIC ---
-    // Hapus highlight dari step sebelumnya
     document.querySelectorAll('.tour-highlight').forEach(el => {
         el.classList.remove('tour-highlight');
     });
@@ -104,30 +91,46 @@ function updateTourUI() {
     if (step.target) {
         const targetEl = document.querySelector(step.target);
         if (targetEl) {
-            // 1. Highlight Target Element
-            targetEl.classList.add('tour-highlight');
-            
-            // 2. Position Tooltip
-            const rect = targetEl.getBoundingClientRect();
-            
-            // Reset position classes
-            tooltip.style.top = '';
-            tooltip.style.bottom = '';
-            tooltip.style.left = '';
-            tooltip.style.transform = '';
+            // 1. Scroll to element first (smoothly) so it's not off-screen
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            if (step.position === 'bottom') {
-                tooltip.style.top = `${rect.bottom + 20}px`;
-                tooltip.style.left = `${Math.max(10, Math.min(window.innerWidth - 350, rect.left))}px`;
-            } else if (step.position === 'top') {
-                tooltip.style.bottom = `${window.innerHeight - rect.top + 20}px`;
-                tooltip.style.left = `${Math.max(10, Math.min(window.innerWidth - 350, rect.left))}px`;
-            } else {
-                // Default center
-                tooltip.style.top = '50%';
-                tooltip.style.left = '50%';
-                tooltip.style.transform = 'translate(-50%, -50%)';
-            }
+            // 2. Wait for scroll to finish before calculating position
+            setTimeout(() => {
+                targetEl.classList.add('tour-highlight');
+                const rect = targetEl.getBoundingClientRect();
+                
+                // Reset
+                tooltip.style.top = '';
+                tooltip.style.bottom = '';
+                tooltip.style.left = '';
+                tooltip.style.transform = '';
+
+                // Calculate Horizontal (Mobile safe)
+                let leftPos = Math.max(10, Math.min(window.innerWidth - (window.innerWidth < 480 ? 40 : 360), rect.left));
+                // If on mobile, force it to the left margin
+                if (window.innerWidth <= 480) leftPos = 20; 
+
+                // Calculate Vertical with viewport clamping
+                let topPos = 0;
+                
+                if (step.position === 'bottom') {
+                    topPos = rect.bottom + 20;
+                } else if (step.position === 'top') {
+                    topPos = rect.top - 240; // Roughly the height of the tooltip
+                    if (topPos < 80) topPos = rect.bottom + 20; // Fallback if it hits top edge
+                }
+
+                // CLAMPING: Prevent tooltip from going below the screen or above the screen
+                const tooltipHeight = 240; // Approximate height of tooltip
+                if (topPos + tooltipHeight > window.innerHeight) {
+                    topPos = window.innerHeight - tooltipHeight - 20;
+                }
+                if (topPos < 60) topPos = 60; // Keep it below the top edge (space for mascot)
+
+                tooltip.style.top = `${topPos}px`;
+                tooltip.style.left = `${leftPos}px`;
+                
+            }, 400); // 400ms delay for smooth scroll to finish
         }
     } else {
         // Center for Welcome Step
@@ -138,7 +141,6 @@ function updateTourUI() {
 }
 
 function nextTourStep() {
-    // Hapus highlight terakhir
     document.querySelectorAll('.tour-highlight').forEach(el => {
         el.classList.remove('tour-highlight');
     });
@@ -151,24 +153,26 @@ function nextTourStep() {
     }
 }
 
-function skipTour() {
-    finishTour();
-}
+function skipTour() { finishTour(); }
 
 function finishTour() {
     localStorage.setItem('hy_tour_done', 'true');
     const overlay = document.getElementById('tour-overlay');
-    if (overlay) {
+    const tooltip = document.getElementById('tour-tooltip');
+    
+    if (overlay && tooltip) {
         overlay.classList.remove('active');
-        setTimeout(() => overlay.remove(), 300);
+        tooltip.classList.remove('active');
+        setTimeout(() => {
+            overlay.remove();
+            tooltip.remove();
+        }, 300);
     }
     document.querySelectorAll('.tour-highlight').forEach(el => {
         el.classList.remove('tour-highlight');
     });
 }
 
-// Jalankan otomatis saat DOM siap
 document.addEventListener('DOMContentLoaded', () => {
-    // Delay agar halaman selesai render dulu
     setTimeout(initOnboardingTour, 1500); 
 });
