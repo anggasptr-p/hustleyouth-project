@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HustleYouth - Katalog Jasa</title> 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
     <aside id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <a href="index.html" class="logo-brand">
@@ -27,7 +26,6 @@
     </aside>
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-    <!-- Main Content -->
     <main class="main-content">
         <header>
             <div class="header-left">
@@ -48,6 +46,33 @@
             </div>
         </header>
 
+        <div class="marquee-container">
+            <div class="marquee-content">
+                ⚡ WELCOME TO HUSTLEYOUTH ⚡ TOP TALENT FROM SMKN 1 MALANG ⚡ 100+ GIGS AVAILABLE ⚡ SUPPORT YOUTH CREATORS ⚡ ⚡ WELCOME TO HUSTLEYOUTH ⚡ TOP TALENT FROM SMKN 1 MALANG ⚡ 100+ GIGS AVAILABLE ⚡ SUPPORT YOUTH CREATORS ⚡
+            </div>
+        </div>
+
+        <div class="hero-section">
+            <div class="hero-text">
+                <h1>Temukan Talent Muda<br>Terbaik di Indonesia 🚀</h1>
+                <p>Dari desain grafis, koding, sampai editing video. Semua dikerjakan oleh pelajar dan mahasiswa berbakat.</p>
+                <div class="hero-buttons">
+                    <a href="#gigs-container" class="btn-hero-primary">Cari Jasa 🔍</a>
+                    <a href="tambah-jasa.html" class="btn-hero-secondary">Buka Jasa ⚡</a>
+                </div>
+            </div>
+            
+            <div class="hero-mascot">
+                <div class="mascot-glow"></div>
+                <!-- THE PNG MASCOT -->
+                <img src="assets/img/mascot.png" alt="HustleYouth Elephant Bot" class="elephant-bot-img">
+                
+                <div class="floating-sticker sticker-1">💻</div>
+                <div class="floating-sticker sticker-2">🎨</div>
+                <div class="floating-sticker sticker-3">🔥</div>
+            </div>
+        </div>
+
         <div class="container">
             <div class="filters" id="category-filters">
                 <button class="filter-btn active" data-category="all">Semua</button>
@@ -57,12 +82,10 @@
                 <button class="filter-btn" data-category="Writing">Writing</button>
             </div>
 
-            <!-- Grid Container -->
             <div id="gigs-container" class="grid"></div>
         </div>
     </main>
 
-    <!-- Modal Detail Pop-up -->
     <div id="modal-overlay" class="modal-overlay hidden">
         <div class="modal-content">
             <button id="close-modal" class="modal-close"><i class="fa-solid fa-xmark"></i></button>

@@ -19,7 +19,7 @@ async function fetchPosts() {
     if (!container) return;
 
     try {
-        container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:3rem;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat obrolan stream...</p>`;
+        container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:3rem;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Memuat obrolan stream...</p>`;
 
         const url = currentFilter === 'all' ? STREAM_API : `${STREAM_API}?type=${currentFilter}`;
         const res = await fetch(url);
@@ -40,8 +40,15 @@ function renderStream(posts) {
     const container = document.getElementById('stream-container');
     if (!container) return;
 
+    // EMPTY STATE WITH PNG MASCOT
     if (!posts || posts.length === 0) {
-        container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:3rem;">Belum ada obrolan di Stream. Kirim pesan pertamamu!</p>`;
+        container.innerHTML = `
+            <div style="text-align:center; padding:3rem 1rem; background:var(--card-bg); border:2px dashed var(--glass-border); border-radius:1rem;">
+                <img src="assets/img/mascot.png" alt="Mascot" style="width: 130px; height: auto; margin: 0 auto 1rem auto; animation: float 3s infinite; filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.3));">
+                <h3 style="font-family:'Space Grotesk', sans-serif; font-size:1.2rem; color:var(--text-main); margin-bottom:0.5rem;">Stream masih sepi nih...</h3>
+                <p style="color:var(--text-muted); font-size:0.85rem;">Jadilah yang pertama buat ngobrol atau tawar jasa di sini!</p>
+            </div>
+        `;
         return;
     }
 

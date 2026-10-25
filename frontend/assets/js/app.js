@@ -15,9 +15,23 @@ async function fetchGigs() {
     const container = document.getElementById('gigs-container');
     if (!container) return;
 
-    try {
-        container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:3rem;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat data jasa...</p>`;
+    // GEN Z SKELETON LOADER
+    const skeletonCard = `
+        <div class="card" style="pointer-events:none; border-color:transparent;">
+            <div class="card-img-wrapper" style="background:var(--glass-bg); animation: pulse 1.5s infinite;"></div>
+            <div class="card-body">
+                <div style="height:22px; width:85%; background:var(--glass-bg); border-radius:4px; margin-bottom:12px; animation: pulse 1.5s infinite;"></div>
+                <div style="height:16px; width:50%; background:var(--glass-bg); border-radius:4px; margin-bottom:24px; animation: pulse 1.5s infinite;"></div>
+                <div style="display:flex; justify-content:space-between; margin-top:auto;">
+                    <div style="height:24px; width:40%; background:var(--glass-bg); border-radius:4px; animation: pulse 1.5s infinite;"></div>
+                    <div style="height:32px; width:30%; background:var(--glass-bg); border-radius:6px; animation: pulse 1.5s infinite;"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    container.innerHTML = skeletonCard.repeat(6);
 
+    try {
         const res = await fetch(API_URL);
         const result = await res.json();
 
@@ -38,8 +52,18 @@ function renderGigs(gigs) {
     const container = document.getElementById('gigs-container');
     if (!container) return;
 
+    // GEN Z EMPTY STATE
     if (!gigs || gigs.length === 0) {
-        container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:3rem;">Belum ada jasa yang tersedia saat ini.</p>`;
+        container.innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:4rem 1rem; background:var(--card-bg); border:2px dashed var(--glass-border); border-radius:1rem;">
+                <div style="font-size:3rem; margin-bottom:1rem; animation: bounce 2s infinite;">🔍</div>
+                <h3 style="font-family:'Space Grotesk', sans-serif; font-size:1.5rem; margin-bottom:0.5rem;">Yah, belum ada yang jual jasa ini ler...</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; max-width:400px; margin:0 auto 1.5rem auto;">
+                    Coba cari kata kunci lain, atau jadi orang pertama yang buka jasa di kategori ini!
+                </p>
+                <a href="tambah-jasa.html" class="btn-auth-header" style="display:inline-flex; text-decoration:none;">Buka Jasa Sekarang 🚀</a>
+            </div>
+        `;
         return;
     }
 
@@ -53,10 +77,19 @@ function renderGigs(gigs) {
             </div>
             <div class="card-body">
                 <h3 class="card-title">${gig.title}</h3>
-                <p class="card-meta">👤 ${gig.freelancer_name} • ${gig.school}</p>
+                
+                <div class="trust-layer">
+                    <span class="badge-verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                    <span class="rating">★ 4.9</span>
+                </div>
+
+                <p class="card-meta">
+                    <span class="online-dot"></span> 
+                    ${gig.freelancer_name} • ${gig.school}
+                </p>
                 <div class="card-footer">
                     <span class="card-price">Rp ${Number(gig.price).toLocaleString('id-ID')}</span>
-                    <span class="btn-detail">Detail</span>
+                    <span class="btn-detail">Pesan <i class="fa-solid fa-arrow-right"></i></span>
                 </div>
             </div>
         </div>
@@ -111,29 +144,41 @@ function openModal(id) {
     const waLink = `https://wa.me/${gig.whatsapp}?text=${waText}`;
 
     content.innerHTML = `
-        <div style="text-align:center; margin-bottom:1rem;">
-            <span class="card-category" style="position:static; display:inline-block; margin-bottom:0.5rem;">${gig.category}</span>
-            <h2 style="font-size:1.3rem; font-weight:800; line-height:1.3;">${gig.title}</h2>
-            <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.35rem;">Oleh <b>${gig.freelancer_name}</b> (${gig.school})</p>
+        <div style="text-align:left; margin-bottom:1rem;">
+            <span class="card-category" style="position:static; display:inline-block; margin-bottom:0.8rem; transform:rotate(-2deg);">${gig.category}</span>
+            <h2 style="font-size:1.5rem; font-weight:800; line-height:1.3; font-family:'Space Grotesk', sans-serif;">${gig.title}</h2>
+            
+            <div class="trust-layer" style="margin-top:0.5rem;">
+                <span class="badge-verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                <span class="rating">★ 4.9</span>
+                <span style="color:var(--text-muted); font-size:0.8rem;">(12 Ulasan)</span>
+            </div>
+
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.5rem;">
+                oleh <b style="color:var(--text-main);">${gig.freelancer_name}</b> (${gig.school})
+            </p>
         </div>
-        ${gig.image_url ? `<img src="${gig.image_url}" style="width:100%; max-height:220px; object-fit:cover; border-radius:0.85rem; margin-bottom:1rem;">` : ''}
-        <p style="font-size:0.9rem; line-height:1.6; color:var(--text-main); margin-bottom:1.5rem; white-space:pre-line;">${gig.description}</p>
+
+        ${gig.image_url ? `<img src="${gig.image_url}" style="width:100%; max-height:250px; object-fit:cover; border-radius:1rem; margin-bottom:1.25rem; border:1px solid var(--glass-border);">` : ''}
+        
+        <p style="font-size:0.95rem; line-height:1.6; color:var(--text-main); margin-bottom:1.5rem; white-space:pre-line;">${gig.description}</p>
+        
         <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1rem; border-top:1px solid var(--glass-border);">
-            <span class="card-price" style="font-size:1.25rem;">Rp ${Number(gig.price).toLocaleString('id-ID')}</span>
-            <a href="${waLink}" target="_blank" class="btn-wa-direct" style="padding:0.6rem 1.25rem; font-size:0.875rem;">
-                <i class="fa-brands fa-whatsapp"></i> Order via WA
+            <span class="card-price" style="font-size:1.5rem;">Rp ${Number(gig.price).toLocaleString('id-ID')}</span>
+            <a href="${waLink}" target="_blank" class="btn-wa-direct" style="padding:0.75rem 1.5rem; font-size:0.95rem;">
+                <i class="fa-brands fa-whatsapp fa-lg"></i> Order via WA
             </a>
         </div>
     `;
 
     overlay.classList.remove('hidden');
-    overlay.classList.add('active');
+    setTimeout(() => overlay.classList.add('active'), 10);
 
     const closeBtn = document.getElementById('close-modal');
     if (closeBtn) {
         closeBtn.onclick = () => {
             overlay.classList.remove('active');
-            overlay.classList.add('hidden');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
         };
     }
 }

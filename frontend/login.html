@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HustleYouth - Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
     <aside id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <a href="index.html" class="logo-brand">
@@ -27,7 +26,6 @@
     </aside>
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-    <!-- Main Content -->
     <main class="main-content">
         <header>
             <div class="header-left">
@@ -44,6 +42,11 @@
         </header>
 
         <div class="container">
+            <!-- PNG MASCOT -->
+            <div class="auth-mascot-container">
+                <img src="assets/img/mascot.png" alt="HustleYouth Mascot" class="elephant-bot-small-img">
+            </div>
+
             <div class="auth-card">
                 <div class="auth-header">
                     <h2>Masuk HustleYouth</h2>
@@ -51,11 +54,11 @@
                 </div>
                 <form id="login-form" onsubmit="handleLogin(event)">
                     <div class="form-group">
-                        <label>Email</label>
+                        <label for="login_email">Email</label>
                         <input type="email" id="login_email" class="form-control" required placeholder="email@sekolah.sch.id">
                     </div>
                     <div class="form-group">
-                        <label>Password</label>
+                        <label for="login_password">Password</label>
                         <input type="password" id="login_password" class="form-control" required placeholder="••••••••">
                     </div>
                     <button type="submit" class="btn-submit">Login</button>
